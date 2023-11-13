@@ -82,7 +82,9 @@ const db = mysql.createConnection(
         case 'AddRole':
           addRole();
           break; 
-        case ''       
+        case 'AddEmployee':
+          addEmployee();
+          break;       
 
 
       }
@@ -177,10 +179,86 @@ function addRole() {
   })
 }
 
-function addEmployee()
+function addEmployee() {
+  db.query('SELECT * FROM roles', function (err, results) {
+    if (err) throw new Error;
+    const roleName = results.map((role) => ({
+      value: role.id,
+      name: role.title
+    }))
+    inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'firstName',
+        message: "Enter the employee's first name."
+      },
+
+      {
+        type: 'input',
+        name: 'lastName',
+        message: "Enter the employee's last name."
+      },
+
+      {
+        type: 'list',
+        name: 'roleID',
+        message: "What role will this employee belong to?",
+        choices: roleName
+      }
+    ]).then((response) => {
+      const empFirstName = response.firstName
+      const empLastName = response.lastName
+      const roleId = response.roleID;
+
+      db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', [empFirstName, empLastName, roleId], 
+      function (err, result) {
+        if (err) throw err;
+        viewEmployees(), initTracker();
+      })
+    })
+  } )
+}
+
+function updateEmployee() {
+  db.query('SELECT * FROM employee', function (err, result) {
+    if (err) throw err;
+  })
+  const updateEmp = results.map((employee) => ({
+    value: employee.id,
+    name: employee.last_name
+  }))
+  db.query('SELECT * FROM roles', function (err, result) {
+    if (err) throw err;
+    const updateRole = results.map((roles) => ({
+      value: roles.id,
+      name: roles.title
+    }))
+    inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'lastName',
+        message: 'Which employee would you like to update?'
+      },
+
+      {
+        type: 'input',
+        name: 'newRole',
+        message: "Please enter the employee's new title."
+      }
+    ]).then((response) => {
+      const empLastName = response.lastName;
+      const empNewRole = response.newRole;
+
+      db.query('UPDATE employee (role_id) VALUES (?)', [empNewRole], function (err, result) {
+        if (err) throw err;
+        updateEmployee(), initTracker();
+      })
+    })
+  })
+}
 
   initTracker();
 
-  module.exports = {
-    db
-  }
+ 
