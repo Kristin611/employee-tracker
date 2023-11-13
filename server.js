@@ -17,6 +17,7 @@ const db = mysql.createConnection(
     console.log(`Connected to employees_db database.`)
   );
 
+  //function to render logo
   function init() {
     const logoText = logo({name: 'Employee Tracker'}).render()
     console.log(logoText);
@@ -25,3 +26,37 @@ const db = mysql.createConnection(
   }
 
   init(); 
+
+  function initTracker() {
+    inquirer
+    .prompt([
+      {
+            type: 'list',
+            message: 'What would you like to do?',
+            name: 'inquire',
+            choices: [
+                'View All Employees',
+                'Add Employee',
+                'Update Employee Role',
+                'View All Roles',
+                'Add Role',
+                'View All Departments',
+                'Add Department',
+                'Quit'
+
+            ]
+      }
+    ])
+    .then((response) => {
+      const inquire = response.inquire;
+
+      let inquireChoice;
+      switch(response.inquire) {
+        case 'View All Employees':
+          inquireChoice = 
+
+      }
+    })
+  }
+
+  initTracker();
