@@ -119,14 +119,6 @@ function viewRoles() {
   })
 }
 
-//function to retreive all employee data, including department and role data, from the employees_db
-// function viewEmployeeInfo() {
-//   db.query(`SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;`, (err, results) => {
-//       if (err) throw err;
-//       console.table(results), initTracker();
-//   })
-// }
-
 //function to add a department to the department table in the employees_db
 function addDepartment() {
   inquirer
@@ -152,7 +144,7 @@ function addRole() {
   db.query('SELECT * FROM department', function (err, results) {
     if (err) {
       console.log(err)
-      initTracker()
+      //initTracker()
     }
 
     //used map() method to loop through department table to add role to the appropriate department
@@ -191,7 +183,8 @@ function addRole() {
         if (err) {
           console.log(err)
         } else {
-          viewRoles(), initTracker()
+          viewRoles();
+          //initTracker();
         }
       })
     })
@@ -236,7 +229,8 @@ function addEmployee() {
       db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', [empFirstName, empLastName, roleId], 
       function (err, result) {
         if (err) throw err;
-        viewEmployees(), initTracker();
+        viewEmployees();
+        //initTracker();
       })
     })
   } )
@@ -285,7 +279,7 @@ function updateEmployee() {
             //querying the employee table to update it with new employee role information
           db.query('UPDATE employee SET role_id = ? WHERE id = ?', [empNewRole, empLastName], function (err, result) {
             if (err) throw err;
-            viewEmployees(), initTracker();
+            viewEmployees();
           })
         })
       })
