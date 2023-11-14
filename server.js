@@ -27,6 +27,7 @@ const db = mysql.createConnection(
 
   init(); 
 
+  //function to initialize employee tracker that includes the prompts and switch cases for whatever the user wishes to view
   function initTracker() {
     inquirer
     .prompt([
@@ -84,19 +85,25 @@ const db = mysql.createConnection(
           break; 
         case 'AddEmployee':
           addEmployee();
-          break;       
+          break;
+        case 'UpdateEmployeesRole':
+          updateEmployee();
+          break;     
 
 
       }
     })
   }
+
+  //function to retreive all employee data, including title, department and salary data, from the employees_db
   function viewEmployees() {
-    db.query('SELECT * FROM employee', (err, results) => {
+    db.query(`SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;`, (err, results) => {
         if (err) throw err;
         console.table(results), initTracker();
     })
 }
 
+//function to retreive department data from department table in the employees_db
 function viewDepartments() {
   db.query('SELECT * FROM department', (err, results) => {
       if (err) throw err;
@@ -104,6 +111,7 @@ function viewDepartments() {
   })
 }
 
+//function to retreive roles data from roles table in the employees_db
 function viewRoles() {
   db.query('SELECT * FROM roles', (err, results) => {
       if (err) throw err;
@@ -111,6 +119,15 @@ function viewRoles() {
   })
 }
 
+//function to retreive all employee data, including department and role data, from the employees_db
+// function viewEmployeeInfo() {
+//   db.query(`SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;`, (err, results) => {
+//       if (err) throw err;
+//       console.table(results), initTracker();
+//   })
+// }
+
+//function to add a department to the department table in the employees_db
 function addDepartment() {
   inquirer
   .prompt([
@@ -130,6 +147,7 @@ function addDepartment() {
  
 }
 
+//function to add a role to the roles table in the employees_db
 function addRole() {
   db.query('SELECT * FROM department', function (err, results) {
     if (err) {
@@ -137,6 +155,7 @@ function addRole() {
       initTracker()
     }
 
+    //used map() method to loop through department table to add role to the appropriate department
     const departmentChoices = results.map((department) => ({
       value: department.id, 
       name: department.name
@@ -166,7 +185,7 @@ function addRole() {
       let departmentId = response.departmentID
       let roleName = response.addRole;
       let salary = response.salary
-
+      //querying the table to add a new role to the roles table
       db.query('INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)', [roleName, salary, departmentId], 
       function (err, result) {
         if (err) {
@@ -178,8 +197,10 @@ function addRole() {
     })
   })
 }
-
+//function to add an employee to the employee table in the employees_db
 function addEmployee() {
+
+  //querying the roles table and mapping through it to assign a role to the new employee
   db.query('SELECT * FROM roles', function (err, results) {
     if (err) throw new Error;
     const roleName = results.map((role) => ({
@@ -211,6 +232,7 @@ function addEmployee() {
       const empLastName = response.lastName
       const roleId = response.roleID;
 
+        //querying the employee table to add a new employee with assigned role
       db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', [empFirstName, empLastName, roleId], 
       function (err, result) {
         if (err) throw err;
@@ -219,44 +241,58 @@ function addEmployee() {
     })
   } )
 }
-
+//function to update an employee's info in the employee table in the employees_db
 function updateEmployee() {
-  db.query('SELECT * FROM employee', function (err, result) {
+
+  //querying the employees table to map through employee list by last name in order to choose which employee the user wants to update
+  db.query('SELECT * FROM employee', function (err, results) {
     if (err) throw err;
-  })
-  const updateEmp = results.map((employee) => ({
-    value: employee.id,
-    name: employee.last_name
-  }))
-  db.query('SELECT * FROM roles', function (err, result) {
-    if (err) throw err;
-    const updateRole = results.map((roles) => ({
-      value: roles.id,
-      name: roles.title
+    const updateEmp = results.map((employee) => ({
+      value: employee.id,
+      name: employee.last_name
     }))
     inquirer
     .prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'lastName',
-        message: 'Which employee would you like to update?'
-      },
-
-      {
-        type: 'input',
-        name: 'newRole',
-        message: "Please enter the employee's new title."
+        message: 'Which employee would you like to update?',
+        choices: updateEmp
       }
     ]).then((response) => {
       const empLastName = response.lastName;
-      const empNewRole = response.newRole;
 
-      db.query('UPDATE employee (role_id) VALUES (?)', [empNewRole], function (err, result) {
+    //querying the roles table to map through roles list in order to update the employee's new role/title  
+      db.query('SELECT * FROM roles', function (err, results) {
         if (err) throw err;
-        updateEmployee(), initTracker();
+        const updateRole = results.map((role) => ({
+          value: role.id,
+          name: role.title
+        }))
+        inquirer
+        .prompt([
+    
+          {
+            type: 'list',
+            name: 'newRole',
+            message: "Please enter the employee's new title.",
+            choices: updateRole
+          }
+        ]).then((response) => {
+          
+          const empNewRole = response.newRole;
+    
+            //querying the employee table to update it with new employee role information
+          db.query('UPDATE employee SET role_id = ? WHERE id = ?', [empNewRole, empLastName], function (err, result) {
+            if (err) throw err;
+            viewEmployees(), initTracker();
+          })
+        })
       })
     })
   })
+  
+  
 }
 
   initTracker();
