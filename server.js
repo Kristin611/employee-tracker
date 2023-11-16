@@ -133,7 +133,7 @@ function addDepartment() {
     let departmentName = response.addADepartment
 
     db.query('INSERT INTO department (name) VALUES (?)', [departmentName], function (err, results) {
-      err ? console.log(err): viewDepartments(), initTracker()
+      err ? console.log(err): viewDepartments(); //initTracker()
     })
   })
  

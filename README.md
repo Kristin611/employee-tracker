@@ -10,4 +10,5 @@ Technologies used to build the application were MySQL, Inquirer, and Node.js.
 
 Try it yourself at the link below:
 
-https://drive.google.com/file/d/192VI6-YssMeCxldcU1aw3eCvlWtxj6Y-/view
+https://drive.google.com/file/d/1_aRNG_orYDxxZr64dnYVpvDGdIv3gIbX/view
+
